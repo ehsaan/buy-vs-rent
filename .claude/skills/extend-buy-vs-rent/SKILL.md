@@ -8,7 +8,7 @@ description: Add or modify pieces of the Buy vs Rent + Invest dashboard. Use whe
 ## Architecture in 30 seconds
 
 - `buy_vs_rent.html` is the **master** — always edit this.
-- `buy_vs_rent_quick.html` is **generated** by `_build_quick.py`. Never edit it directly; rebuild instead. The build reads the master, splices its inputs into one consolidated panel, and wraps each step's output block in a `<details>` collapsible.
+- `index.html` is **generated** by `_build_quick.py`. Never edit it directly; rebuild instead. The build reads the master, splices its inputs into one consolidated panel, and wraps each step's output block in a `<details>` collapsible.
 - All compute functions chain through `computeCompare()`, which `computeAll()` (in the quick file) wraps. Each `computeX()` reads inputs from the DOM, validates, populates a global state object, renders into stable element IDs, and returns the state.
 
 State globals (in the `<script>` block, near the top):
@@ -119,7 +119,7 @@ Re-run when prices need refreshing (the data is annual; once a year is plenty).
 
 1. Run a local server: `python -m http.server 8765`.
 2. Open `http://localhost:8765/buy_vs_rent.html` — fill inputs, run each step, watch for console errors.
-3. Open `http://localhost:8765/buy_vs_rent_quick.html` — fill the same inputs, click `Calculate All Paths`, expand every `<details>` block.
+3. Open `http://localhost:8765/` (serves `index.html`) — fill the same inputs, click `Calculate All Paths`, expand every `<details>` block.
 4. Compare: both pages should produce **identical** Path A vs Path B numbers and verdict.
 5. Mismatch ⇒ the build script's HTML diverged from the master's. Re-check that the inputs you added are mirrored into `_build_quick.py`.
 

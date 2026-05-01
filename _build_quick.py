@@ -8,9 +8,9 @@ for each step's outputs.
 import re
 from pathlib import Path
 
-ROOT = Path(r"C:\Users\user1\Documents\house")
+ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "buy_vs_rent.html"
-DST = ROOT / "buy_vs_rent_quick.html"
+DST = ROOT / "index.html"
 
 src = SRC.read_text(encoding="utf-8")
 
@@ -82,6 +82,45 @@ extra_css = r"""
   }
 
   .all-errors > .error-box { margin-top: 8px; }
+
+  /* --- Mobile-only jump-to-section pill nav --- */
+  .jump-nav { display: none; }
+  @media (max-width: 640px) {
+    .jump-nav {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      position: sticky;
+      top: 0;
+      background: rgba(10, 12, 15, 0.92);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 10px 14px;
+      margin: -20px -14px 14px;
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      scrollbar-width: none;
+    }
+    .jump-nav::-webkit-scrollbar { display: none; }
+    .jump-nav a {
+      flex-shrink: 0;
+      padding: 8px 14px;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--amber-dim);
+      border: 1px solid var(--border-bright);
+      border-radius: 1px;
+      background: var(--panel);
+      text-decoration: none;
+    }
+    .jump-nav a:active { color: var(--amber); border-color: var(--amber-dim); background: rgba(240,165,0,0.06); }
+
+    /* Make sure anchors don't end up hidden behind the sticky pill bar */
+    #compareSummary,
+    details.detail-block[id] { scroll-margin-top: 64px; }
+  }
 """
 src = src.replace("</style>", extra_css + "\n</style>", 1)
 
@@ -102,6 +141,16 @@ new_body = r"""<body>
       </div>
     </div>
   </header>
+
+  <!-- Mobile-only jump-to-section nav (hidden on desktop via CSS) -->
+  <nav class="jump-nav" aria-label="Jump to section">
+    <a href="#compareSummary">Summary</a>
+    <a href="#sec-buy">Buy</a>
+    <a href="#sec-sell">Sell</a>
+    <a href="#sec-rent">Rent</a>
+    <a href="#sec-stock">Stock</a>
+    <a href="#sec-cashflow">Cashflow</a>
+  </nav>
 
   <!-- ALL INPUTS -->
   <div class="panel">
@@ -307,7 +356,7 @@ new_body = r"""<body>
 
   <!-- COLLAPSIBLE DETAILS -->
 
-  <details class="detail-block">
+  <details class="detail-block" id="sec-buy">
     <summary>Buy &amp; Carry — home price, monthly decomposition, lifetime costs</summary>
     <div class="detail-content">
       <div class="summary visible" id="housingSummary">
@@ -366,7 +415,7 @@ new_body = r"""<body>
     </div>
   </details>
 
-  <details class="detail-block">
+  <details class="detail-block" id="sec-sell">
     <summary>Sell &amp; Realize — HPI lookup, sale math, Path A P&amp;L</summary>
     <div class="detail-content">
       <div class="summary visible" id="saleSummary">
@@ -395,7 +444,7 @@ new_body = r"""<body>
     </div>
   </details>
 
-  <details class="detail-block">
+  <details class="detail-block" id="sec-rent">
     <summary>Rent — year-by-year cash outlay</summary>
     <div class="detail-content">
       <div class="summary visible" id="rentSummary">
@@ -414,7 +463,7 @@ new_body = r"""<body>
     </div>
   </details>
 
-  <details class="detail-block">
+  <details class="detail-block" id="sec-stock">
     <summary>Stock Investment — lump-sum growth</summary>
     <div class="detail-content">
       <div class="summary visible" id="stockSummary">
@@ -436,16 +485,18 @@ new_body = r"""<body>
     </div>
   </details>
 
-  <details class="detail-block">
+  <details class="detail-block" id="sec-cashflow">
     <summary>Year-by-Year Cashflow — Path B simulation (rent + reinvested surplus)</summary>
     <div class="detail-content">
-      <div class="breakdown">
-        <div class="breakdown-row breakdown-head" style="grid-template-columns: 0.6fr 0.6fr 1fr 1fr 1fr 1fr 1fr;">
-          <div>y</div><div>Year</div>
-          <div class="num">Rent / mo</div><div class="num">Surplus (yr)</div>
-          <div class="num">Stock Px</div><div class="num">Shares</div><div class="num">Portfolio</div>
+      <div class="table-scroll">
+        <div class="breakdown">
+          <div class="breakdown-row breakdown-head" style="grid-template-columns: 0.6fr 0.6fr 1fr 1fr 1fr 1fr 1fr;">
+            <div>y</div><div>Year</div>
+            <div class="num">Rent / mo</div><div class="num">Surplus (yr)</div>
+            <div class="num">Stock Px</div><div class="num">Shares</div><div class="num">Portfolio</div>
+          </div>
+          <div id="cmpYearRows"></div>
         </div>
-        <div id="cmpYearRows"></div>
       </div>
     </div>
   </details>
@@ -493,6 +544,14 @@ async function computeAll() {
   document.getElementById('compareSummary').classList.remove('visible');
   await computeCompare();
 }
+
+// Jump-nav: auto-open <details> targets so the section is actually visible after scroll
+document.querySelectorAll('.jump-nav a').forEach(a => {
+  a.addEventListener('click', () => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target && target.tagName === 'DETAILS') target.open = true;
+  });
+});
 """
 src = src.replace("</script>", js_addons + "\n</script>", 1)
 

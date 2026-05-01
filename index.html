@@ -516,6 +516,73 @@
   a { color: var(--amber-dim); text-decoration: none; }
   a:hover { color: var(--amber); }
 
+  /* --- Mobile responsive (≤ 640px) --- */
+  @media (max-width: 640px) {
+    body { font-size: 15px; }
+    .container { padding: 20px 14px 60px; max-width: 100%; }
+
+    h1 { font-size: 26px; }
+    .header { padding-bottom: 18px; margin-bottom: 24px; }
+    .header-top { flex-direction: column; gap: 12px; }
+    .header-meta { text-align: left; font-size: 12px; line-height: 1.6; }
+
+    .panel-header { padding: 14px 16px; font-size: 11px; }
+    .panel-body { padding: 20px 16px; }
+
+    button { padding: 13px 22px; font-size: 12px; letter-spacing: 0.14em; }
+
+    label { font-size: 11px; }
+    input { font-size: 15px; }
+
+    /* Force every summary-grid (incl. ones with inline grid-template-columns) to stack */
+    .summary-grid,
+    .summary-grid[style] { grid-template-columns: 1fr !important; }
+    .summary-cell { padding: 14px 16px; }
+    .summary-label { font-size: 11px; }
+    .summary-value { font-size: 20px; }
+    .summary-value[style*="32px"],
+    .summary-value[style*="font-size: 32px"] { font-size: 28px !important; }
+    .summary-value[style*="28px"] { font-size: 24px !important; }
+
+    /* Stack aux-grid into one column */
+    .aux-grid,
+    .aux-grid[style] { grid-template-columns: 1fr !important; }
+    .aux-label { font-size: 11px; }
+    .aux-value { font-size: 15px; }
+
+    /* Breakdown rows: label + number, with the dim detail wrapping under */
+    .breakdown-row { grid-template-columns: 1fr auto !important; gap: 4px 12px; padding: 11px 14px; font-size: 13px; }
+    .breakdown-row .num { font-size: 14px; }
+    .breakdown-row .dim { grid-column: 1 / -1; font-size: 11px; line-height: 1.35; }
+    .breakdown-total { font-size: 15px; }
+    .breakdown-total .num { font-size: 20px; }
+
+    /* 3-col compare: label spans full width, two numbers side-by-side */
+    .breakdown-compare .breakdown-row { grid-template-columns: 1fr 1fr !important; }
+    .breakdown-compare .breakdown-row > div:first-child { grid-column: 1 / -1; color: var(--text-dim); font-size: 12px; }
+
+    /* Year-by-year cashflow: scroll horizontally rather than stacking */
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -16px; padding: 0 16px; }
+    .table-scroll .breakdown { min-width: 600px; }
+    .table-scroll .breakdown-row { grid-template-columns: 0.5fr 0.7fr 1fr 1fr 1fr 1fr 1.1fr !important; padding: 9px 14px; font-size: 11px; gap: 0 8px; }
+    .table-scroll .breakdown-row > div { font-size: 11px; }
+    .table-scroll .breakdown-row .num { font-size: 11px; }
+    .table-scroll .breakdown-row .dim { grid-column: auto; font-size: 11px; }
+
+    /* Disclaimers */
+    .disclaimer { padding: 14px 14px; font-size: 12px; }
+
+    /* Subgroup separators a bit tighter */
+    .subgroup-label { margin: 22px 0 10px; font-size: 11px; }
+
+    /* Details panels */
+    details.detail-block > summary { padding: 14px 16px; font-size: 11px; letter-spacing: 0.14em; }
+    details.detail-block .detail-content { padding: 18px 16px; }
+
+    /* Hint text */
+    .hint { font-size: 12px; }
+  }
+
   /* --- Quick-compare layout additions --- */
   .subgroup-label {
     font-size: 10px;
@@ -577,6 +644,45 @@
 
   .all-errors > .error-box { margin-top: 8px; }
 
+  /* --- Mobile-only jump-to-section pill nav --- */
+  .jump-nav { display: none; }
+  @media (max-width: 640px) {
+    .jump-nav {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      position: sticky;
+      top: 0;
+      background: rgba(10, 12, 15, 0.92);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 10px 14px;
+      margin: -20px -14px 14px;
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      scrollbar-width: none;
+    }
+    .jump-nav::-webkit-scrollbar { display: none; }
+    .jump-nav a {
+      flex-shrink: 0;
+      padding: 8px 14px;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--amber-dim);
+      border: 1px solid var(--border-bright);
+      border-radius: 1px;
+      background: var(--panel);
+      text-decoration: none;
+    }
+    .jump-nav a:active { color: var(--amber); border-color: var(--amber-dim); background: rgba(240,165,0,0.06); }
+
+    /* Make sure anchors don't end up hidden behind the sticky pill bar */
+    #compareSummary,
+    details.detail-block[id] { scroll-margin-top: 64px; }
+  }
+
 </style>
 </head>
 <body>
@@ -595,6 +701,16 @@
       </div>
     </div>
   </header>
+
+  <!-- Mobile-only jump-to-section nav (hidden on desktop via CSS) -->
+  <nav class="jump-nav" aria-label="Jump to section">
+    <a href="#compareSummary">Summary</a>
+    <a href="#sec-buy">Buy</a>
+    <a href="#sec-sell">Sell</a>
+    <a href="#sec-rent">Rent</a>
+    <a href="#sec-stock">Stock</a>
+    <a href="#sec-cashflow">Cashflow</a>
+  </nav>
 
   <!-- ALL INPUTS -->
   <div class="panel">
@@ -800,7 +916,7 @@
 
   <!-- COLLAPSIBLE DETAILS -->
 
-  <details class="detail-block">
+  <details class="detail-block" id="sec-buy">
     <summary>Buy &amp; Carry — home price, monthly decomposition, lifetime costs</summary>
     <div class="detail-content">
       <div class="summary visible" id="housingSummary">
@@ -859,7 +975,7 @@
     </div>
   </details>
 
-  <details class="detail-block">
+  <details class="detail-block" id="sec-sell">
     <summary>Sell &amp; Realize — HPI lookup, sale math, Path A P&amp;L</summary>
     <div class="detail-content">
       <div class="summary visible" id="saleSummary">
@@ -888,7 +1004,7 @@
     </div>
   </details>
 
-  <details class="detail-block">
+  <details class="detail-block" id="sec-rent">
     <summary>Rent — year-by-year cash outlay</summary>
     <div class="detail-content">
       <div class="summary visible" id="rentSummary">
@@ -907,7 +1023,7 @@
     </div>
   </details>
 
-  <details class="detail-block">
+  <details class="detail-block" id="sec-stock">
     <summary>Stock Investment — lump-sum growth</summary>
     <div class="detail-content">
       <div class="summary visible" id="stockSummary">
@@ -929,16 +1045,18 @@
     </div>
   </details>
 
-  <details class="detail-block">
+  <details class="detail-block" id="sec-cashflow">
     <summary>Year-by-Year Cashflow — Path B simulation (rent + reinvested surplus)</summary>
     <div class="detail-content">
-      <div class="breakdown">
-        <div class="breakdown-row breakdown-head" style="grid-template-columns: 0.6fr 0.6fr 1fr 1fr 1fr 1fr 1fr;">
-          <div>y</div><div>Year</div>
-          <div class="num">Rent / mo</div><div class="num">Surplus (yr)</div>
-          <div class="num">Stock Px</div><div class="num">Shares</div><div class="num">Portfolio</div>
+      <div class="table-scroll">
+        <div class="breakdown">
+          <div class="breakdown-row breakdown-head" style="grid-template-columns: 0.6fr 0.6fr 1fr 1fr 1fr 1fr 1fr;">
+            <div>y</div><div>Year</div>
+            <div class="num">Rent / mo</div><div class="num">Surplus (yr)</div>
+            <div class="num">Stock Px</div><div class="num">Shares</div><div class="num">Portfolio</div>
+          </div>
+          <div id="cmpYearRows"></div>
         </div>
-        <div id="cmpYearRows"></div>
       </div>
     </div>
   </details>
@@ -1760,6 +1878,14 @@ async function computeAll() {
   document.getElementById('compareSummary').classList.remove('visible');
   await computeCompare();
 }
+
+// Jump-nav: auto-open <details> targets so the section is actually visible after scroll
+document.querySelectorAll('.jump-nav a').forEach(a => {
+  a.addEventListener('click', () => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target && target.tagName === 'DETAILS') target.open = true;
+  });
+});
 
 </script>
 </body>

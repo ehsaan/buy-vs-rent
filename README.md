@@ -12,9 +12,9 @@ There are **two pages**:
 | File | What it's for |
 | --- | --- |
 | `buy_vs_rent.html` | Step-by-step walkthrough (6 panels, learn the model) |
-| `buy_vs_rent_quick.html` | All inputs in one form, single button, details collapsed |
+| `index.html` | All inputs in one form, single button, details collapsed |
 
-The quick file is **generated** from the step-by-step file by `_build_quick.py` — edit the master and rebuild, don't edit the quick file by hand.
+`index.html` is **generated** from the step-by-step file by `_build_quick.py` — edit the master and rebuild, don't edit `index.html` by hand.
 
 ## Run locally
 
@@ -24,7 +24,7 @@ The pages need to be served over HTTP (browsers block `fetch()` of local files v
 python -m http.server 8765
 ```
 
-Then open <http://localhost:8765/buy_vs_rent_quick.html>.
+Then open <http://localhost:8765/>.
 
 ## Inputs
 
@@ -90,7 +90,7 @@ After any change to `buy_vs_rent.html` (markup, JS, CSS), regenerate the single-
 .venv\Scripts\python _build_quick.py
 ```
 
-The script reads `buy_vs_rent.html`, splices its inputs into one panel, wraps each step's output in a `<details>` collapsible, and writes `buy_vs_rent_quick.html`. Don't edit `buy_vs_rent_quick.html` directly — your edits will be overwritten on the next rebuild.
+The script reads `buy_vs_rent.html`, splices its inputs into one panel, wraps each step's output in a `<details>` collapsible, and writes `index.html`. Don't edit `index.html` directly — your edits will be overwritten on the next rebuild.
 
 ## Deploying
 
@@ -126,7 +126,7 @@ The model is documented inline in the page footer, but for convenience:
 ├── README.md
 ├── .gitignore
 ├── buy_vs_rent.html          # step-by-step walkthrough (master)
-├── buy_vs_rent_quick.html    # generated · do not edit
+├── index.html                # generated · do not edit
 ├── hpi_at_zip5.json          # FHFA ZIP5 annual HPI (~10 MB)
 ├── stocks/                   # cached year-end adjusted closes
 │   ├── VOO.json
@@ -136,5 +136,5 @@ The model is documented inline in the page footer, but for convenience:
 │   └── NVDA.json
 ├── fetch_stock.py            # tool · refresh ./stocks/<TICKER>.json
 ├── convert_hpi.py            # tool · xlsx → hpi_at_zip5.json
-└── _build_quick.py           # tool · regenerate buy_vs_rent_quick.html
+└── _build_quick.py           # tool · regenerate index.html
 ```
