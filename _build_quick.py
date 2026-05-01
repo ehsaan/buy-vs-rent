@@ -212,19 +212,25 @@ new_body = r"""<body>
           </div>
         </div>
         <div class="field">
-          <label>Mortgage Rate (APR %)</label>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; flex-wrap: wrap;">
+            <label style="margin: 0;">Mortgage Rate (APR %)</label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-dim); margin: 0; letter-spacing: 0.05em; text-transform: none; cursor: pointer;">
+              <input type="checkbox" id="useAutoRate" checked style="width: auto; margin: 0;"> auto
+            </label>
+          </div>
           <input id="rate" type="number" placeholder="e.g. 7.0" min="0" max="30" step="0.01" value="7.0">
+          <span class="hint" id="rateHint">Auto: 10-yr Treasury (purchase year) + 1.7% spread · uncheck to type your contract rate</span>
         </div>
         <div class="field">
           <label>Insurance Rate (% / yr)</label>
           <input id="insRate" type="number" min="0" max="5" step="0.05" value="0.35">
         </div>
         <div class="field">
-          <label>Marginal Tax Rate (%)</label>
+          <label>Marginal Tax Rate (%)<button class="help-btn" type="button" data-help="taxRate" aria-label="What is marginal tax rate?">?</button></label>
           <input id="taxRate" type="number" min="0" max="60" step="0.1" value="35">
         </div>
         <div class="field">
-          <label>SALT Cap / Year ($)</label>
+          <label>SALT Cap / Year ($)<button class="help-btn" type="button" data-help="saltCap" aria-label="What is the SALT cap?">?</button></label>
           <input id="saltCap" type="number" min="0" step="500" value="10000">
         </div>
       </div>
@@ -521,6 +527,14 @@ new_body = r"""<body>
     All numbers are <em>nominal</em> — no inflation or discount-rate adjustment.
   </div>
 </div>
+
+<dialog class="help-dialog" id="helpDialog">
+  <div class="help-head">
+    <div class="help-title" id="helpTitle">Help</div>
+    <button class="help-close" id="helpClose" type="button" aria-label="Close">×</button>
+  </div>
+  <div class="help-body" id="helpBody"></div>
+</dialog>
 """
 
 # Replace from the literal <body> opening tag (anchored at a line start so it

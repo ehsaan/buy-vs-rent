@@ -33,6 +33,7 @@ Then open <http://localhost:8765/>.
 
 **Buy & Carry (CA)**
 - HOA, mortgage rate, insurance rate, marginal tax rate, SALT cap.
+- The mortgage rate has an **auto** mode (default on): when sale year + horizon are set, it auto-fills as the 10-year Treasury yield for the purchase year plus a fixed 1.7% spread (a copyright-clean proxy for the historical 30-year fixed). Uncheck `auto` to type your actual contract rate.
 - Home price is **not** a direct input — it's solved from the affordability formula (Chase-style):
   `H = (M − HOA + D·a) / (a + (t + i)/12)` where `a` is the monthly amortization factor.
 
@@ -65,6 +66,16 @@ python -m venv .venv
 ```
 
 If you cache a new ticker, also add it to the `<select id="tickerSelect">` block in `buy_vs_rent.html` and the matching block in `_build_quick.py`, and append it to `CACHED_TICKERS` in the JS — then rebuild the quick file (below).
+
+### Refresh 10-yr Treasury cache (`treasury_rates.json`)
+
+Used by the auto-mortgage-rate feature. Stdlib only, no key needed:
+
+```bash
+python fetch_treasury.py
+```
+
+Pulls FRED's `DGS10` CSV (sourced from the US Treasury, public-domain), computes annual averages, and writes `treasury_rates.json` (~1 KB, 60+ years). We deliberately do **not** ship Freddie Mac PMMS / FRED `MORTGAGE30US` — that series is proprietary and can't be redistributed. The page approximates 30-yr fixed = `DGS10 + 1.7%`.
 
 ### Refresh FHFA HPI (`hpi_at_zip5.json`)
 
@@ -128,6 +139,7 @@ The model is documented inline in the page footer, but for convenience:
 ├── buy_vs_rent.html          # step-by-step walkthrough (master)
 ├── index.html                # generated · do not edit
 ├── hpi_at_zip5.json          # FHFA ZIP5 annual HPI (~10 MB)
+├── treasury_rates.json       # FRED DGS10 annual averages (~1 KB)
 ├── stocks/                   # cached year-end adjusted closes
 │   ├── VOO.json
 │   ├── AAPL.json
@@ -135,6 +147,7 @@ The model is documented inline in the page footer, but for convenience:
 │   ├── QCOM.json
 │   └── NVDA.json
 ├── fetch_stock.py            # tool · refresh ./stocks/<TICKER>.json
+├── fetch_treasury.py         # tool · refresh treasury_rates.json from FRED DGS10
 ├── convert_hpi.py            # tool · xlsx → hpi_at_zip5.json
 └── _build_quick.py           # tool · regenerate index.html
 ```

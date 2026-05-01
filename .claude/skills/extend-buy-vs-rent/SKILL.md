@@ -21,6 +21,7 @@ State globals (in the `<script>` block, near the top):
 | `stockState`   | `computeStocks()`  | ticker, start/end price, shares, end value |
 | `stockCache`   | `loadStock()`      | in-memory ticker → data |
 | `hpiData`      | `loadHPI()`        | full ZIP5 HPI map |
+| `treasuryRates`| `loadTreasuryRates()` | year → 10-yr Treasury annual avg (DGS10) |
 
 Element IDs are **flat / unscoped** — the master file has them inside step panels; the quick file moves outputs into `<details>` blocks but keeps IDs identical. **All IDs must be globally unique.** Prefixes by step: `r*` (rent), `k*` (stock), `s*` (sale), `cmp*` (compare), `h*` / `d*` / `l*` (housing).
 
@@ -106,6 +107,16 @@ curl -L -o hpi_at_zip5.xlsx https://www.fhfa.gov/hpi/download/annual/hpi_at_zip5
 ```
 
 The xlsx is gitignored; only `hpi_at_zip5.json` (~10 MB) ships in the repo.
+
+## Recipe — refresh `treasury_rates.json`
+
+Stdlib only, no key:
+
+```bash
+python fetch_treasury.py
+```
+
+Pulls FRED's `DGS10` (10-yr Treasury, public-domain US Treasury data), computes annual averages. Used by the auto-mortgage-rate feature: rate = `DGS10[purchaseYear] + MORTGAGE_TREASURY_SPREAD` (currently 1.7%). Do **not** ship Freddie Mac PMMS / FRED `MORTGAGE30US` — that series is proprietary and can't be redistributed; the spread approach is the workaround.
 
 ## Recipe — refresh cached stock data
 
