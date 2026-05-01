@@ -128,6 +128,7 @@ src = src.replace("</style>", extra_css + "\n</style>", 1)
 new_body = r"""<body>
 <div class="container">
   <header class="header">
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light/dark theme">☀</button>
     <div class="header-top">
       <div>
         <div class="agency-tag">Personal Finance · Quick Compare</div>
@@ -182,7 +183,7 @@ new_body = r"""<body>
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; flex-wrap: wrap;">
             <label style="margin: 0;">Stock Ticker <span class="req">*</span></label>
             <label style="display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-dim); margin: 0; letter-spacing: 0.05em; text-transform: none; cursor: pointer;">
-              <input type="checkbox" id="useCached" style="width: auto; margin: 0;"> use cached
+              <input type="checkbox" id="useCached" checked style="width: auto; margin: 0;"> use cached
             </label>
           </div>
           <input id="ticker" type="text" placeholder="SPY · VTI · QQQ" maxlength="8" style="text-transform:uppercase;">
@@ -193,7 +194,7 @@ new_body = r"""<body>
             <option value="QCOM">QCOM — Qualcomm Inc.</option>
             <option value="NVDA">NVDA — NVIDIA Corp.</option>
           </select>
-          <span class="hint" id="cachedHint">Enable "use cached" for VOO / AAPL / GOOG / QCOM / NVDA (last 20 yr · no API key)</span>
+          <span class="hint" id="cachedHint">Cached prices for VOO / AAPL / GOOG / QCOM / NVDA · uncheck to use a custom ticker via Alpha Vantage</span>
         </div>
         <div class="field field-full" id="apiKeyWrapper">
           <label>Alpha Vantage API Key</label>
@@ -522,14 +523,16 @@ new_body = r"""<body>
 </div>
 """
 
-# Replace from <body> through the line just before <script>.
-# The script tag and everything after it (existing JS + </body></html>) is unchanged.
+# Replace from the literal <body> opening tag (anchored at a line start so it
+# doesn't accidentally match a `<body>` inside a comment or string in the head)
+# through the line just before the main <script>. The script tag and everything
+# after it (existing JS + </body></html>) is unchanged.
 src = re.sub(
-    r"<body>.*?(?=<script>)",
+    r"^<body>.*?(?=<script>)",
     new_body,
     src,
     count=1,
-    flags=re.DOTALL,
+    flags=re.DOTALL | re.MULTILINE,
 )
 
 # 4. Append computeAll() function and re-wire keyboard + page init.
@@ -553,7 +556,10 @@ document.querySelectorAll('.jump-nav a').forEach(a => {
   });
 });
 """
-src = src.replace("</script>", js_addons + "\n</script>", 1)
+# Insert js_addons just before the LAST </script> (the main JS block).
+# The earlier </script> belongs to the small FOUC-prevention script in <head>.
+last_close = src.rfind("</script>")
+src = src[:last_close] + js_addons + "\n" + src[last_close:]
 
 DST.write_text(src, encoding="utf-8")
 print(f"Wrote {DST}: {len(src):,} chars, {src.count(chr(10))+1} lines")
