@@ -1,0 +1,16 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Excel temp / lockfiles
+~$*
+
+# Source xlsx is regeneratable from FHFA — keep only the JSON
+*.xlsx
+
+# Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
